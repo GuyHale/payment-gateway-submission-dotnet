@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using PaymentGateway.Api.Interfaces;
 using PaymentGateway.Api.Models.Entities;
 using PaymentGateway.Api.Models.Requests;
+using PaymentGateway.Api.Models.Responses;
 using PaymentGateway.Api.Validation;
 
 namespace PaymentGateway.Api.Controllers;
@@ -35,7 +36,13 @@ public class PaymentsController : Controller
     }
 
     [HttpPost]
-    [RequestSizeLimit(1_000)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(PostPaymentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [RequestSizeLimit(256)]
     public async Task<IActionResult> PostPaymentAsync(PostPaymentRequest request, CancellationToken ct = default)
     {
         try
@@ -70,6 +77,10 @@ public class PaymentsController : Controller
     }
 
     [HttpGet("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(GetPaymentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public IActionResult GetPaymentAsync(Guid id, CancellationToken ct = default)
     {
         try
